@@ -8,7 +8,9 @@
   "dependencies": {
     "@sap/cds": "^7",
     "express": "^4",
-    "@sap/cds-hana": "^2"
+    "@sap/cds-hana": "^2",
+    "@sap/hdbext": "^7.3.1",
+    "sap-hdbext-promisfied": "2.202108.1"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1",
