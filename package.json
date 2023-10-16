@@ -7,17 +7,19 @@
   "private": true,
   "dependencies": {
     "@sap/cds": "^7",
-    "express": "^4",
     "@sap/cds-hana": "^2",
     "@sap/hdbext": "^7.3.1",
+    "express": "^4",
     "sap-hdbext-promisfied": "2.202108.1"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1",
-    "@sap/cds-dk": "^7"
+    "@sap/cds-dk": "^7",
+    "@sap/ux-specification": "^1.108.16"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "watch-officesuppliesui": "cds watch --open officesuppliesui/webapp/index.html?sap-ui-xx-viewCache=false"
   },
   "cds": {
     "hana": {
@@ -28,5 +30,8 @@
         "kind": "hana"
       }
     }
-  }
+  },
+  "sapux": [
+    "app/officesuppliesui"
+  ]
 }
