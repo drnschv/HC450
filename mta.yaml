@@ -9,7 +9,14 @@ build-parameters:
     - builder: custom
       commands:
         - npx cds build --production
+
+#-----------------------------------------        
 modules:
+#-----------------------------------------
+
+#-------------------------------------------
+# Server module
+#-------------------------------------------
   - name: hc_off_supplies-srv
     type: nodejs
     path: gen/srv
@@ -20,10 +27,15 @@ modules:
     provides:
       - name: srv-api # required by consumers of CAP services (e.g. approuter)
         properties:
-          srv-url: ${default-url}
+          srv-url: '${default-url}'
     requires:
       - name: hc_off_supplies-db
+      - name: hc_off_supplies-xsuaa
+      - name: hc_off_supplies-destination
 
+#-------------------------------------------
+# db deployer module - sidecar module
+#-------------------------------------------
   - name: hc_off_supplies-db-deployer
     type: hdb
     path: gen/db
@@ -31,10 +43,82 @@ modules:
       buildpack: nodejs_buildpack
     requires:
       - name: hc_off_supplies-db
+      - name: hc_off_supplies-xsuaa
 
+#-------------------------------------------
+# approuter module
+#-------------------------------------------
+  - name: hc_off_supplies-approuter
+    type: nodejs
+    path: approuter
+    requires:
+      - name: hc_off_supplies-xsuaa
+      - name: srv-api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          strictSSL: true
+          name: srv-binding
+          url: '~{srv-url}'
+    build-parameters:
+      requires:
+        - name: hc_off_supplies-app
+          artifacts:
+            - ./*
+          target-path: resources
+
+#-------------------------------------------
+# application module
+#-------------------------------------------
+  - name: hc_off_supplies-app
+    type: html5
+    path: app
+    build-parameters: 
+      supported-platforms: []
+
+#-------------------------------------------------
 resources:
+#-------------------------------------------------
+
+#-------------------------------------------
+# HDI container resource
+#-------------------------------------------
   - name: hc_off_supplies-db
     type: com.sap.xs.hdi-container
     parameters:
       service: hana
       service-plan: hdi-shared
+
+#-------------------------------------------
+#--- XSUAA service resource
+#-------------------------------------------
+  - name: hc_off_supplies-xsuaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: 'hc_off_supplies-${space}'
+        role-collections:
+        - name: 'Vendor-${space}'
+          description: Read Access
+          role-template-references:
+          - $XSAPPNAME.Vendor
+        - name: 'ProcurementManager-${space}'
+          description: All Access
+          role-template-references:
+          - $XSAPPNAME.ProcurementManager
+
+#-------------------------------------------
+#---- Destination service resource
+#-------------------------------------------
+  - name: hc_off_supplies-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+
+
+
+

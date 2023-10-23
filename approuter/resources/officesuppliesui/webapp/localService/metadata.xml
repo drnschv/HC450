@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+        <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Measures.V1.xml">
+        <edmx:Include Alias="Measures" Namespace="Org.OData.Measures.V1"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+        <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="CatalogService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <EntityContainer Name="EntityContainer">
+                <EntitySet Name="Products" EntityType="CatalogService.Products">
+                    <NavigationPropertyBinding Path="currency" Target="Currencies"/>
+                    <NavigationPropertyBinding Path="supplier" Target="Suppliers"/>
+                    <NavigationPropertyBinding Path="texts" Target="Products_texts"/>
+                    <NavigationPropertyBinding Path="localized" Target="Products_texts"/>
+                    <NavigationPropertyBinding Path="SiblingEntity" Target="Products"/>
+                </EntitySet>
+                <EntitySet Name="Suppliers" EntityType="CatalogService.Suppliers">
+                    <NavigationPropertyBinding Path="products" Target="Products"/>
+                </EntitySet>
+                <EntitySet Name="Currencies" EntityType="CatalogService.Currencies">
+                    <NavigationPropertyBinding Path="texts" Target="Currencies_texts"/>
+                    <NavigationPropertyBinding Path="localized" Target="Currencies_texts"/>
+                </EntitySet>
+                <EntitySet Name="Products_texts" EntityType="CatalogService.Products_texts"/>
+                <EntitySet Name="Currencies_texts" EntityType="CatalogService.Currencies_texts"/>
+                <FunctionImport Name="get_supplier_info" Function="CatalogService.get_supplier_info" EntitySet="Suppliers"/>
+            </EntityContainer>
+            <EntityType Name="Products">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                    <PropertyRef Name="IsActiveEntity"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="identifier" Type="Edm.String"/>
+                <Property Name="title" Type="Edm.String"/>
+                <Property Name="description" Type="Edm.String"/>
+                <Property Name="availability" Type="Edm.Int32"/>
+                <Property Name="storage_capacity" Type="Edm.Int32"/>
+                <Property Name="criticality" Type="Edm.Int32"/>
+                <Property Name="price" Type="Edm.Decimal" Scale="2" Precision="9"/>
+                <NavigationProperty Name="currency" Type="CatalogService.Currencies">
+                    <ReferentialConstraint Property="currency_code" ReferencedProperty="code"/>
+                </NavigationProperty>
+                <Property Name="currency_code" Type="Edm.String" MaxLength="3"/>
+                <NavigationProperty Name="supplier" Type="CatalogService.Suppliers" Partner="products">
+                    <ReferentialConstraint Property="supplier_ID" ReferencedProperty="ID"/>
+                </NavigationProperty>
+                <Property Name="supplier_ID" Type="Edm.Guid"/>
+                <Property Name="image_url" Type="Edm.String"/>
+                <NavigationProperty Name="texts" Type="Collection(CatalogService.Products_texts)">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="localized" Type="CatalogService.Products_texts">
+                    <ReferentialConstraint Property="ID" ReferencedProperty="ID"/>
+                </NavigationProperty>
+                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="true"/>
+                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="false"/>
+                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false" DefaultValue="false"/>
+                <NavigationProperty Name="DraftAdministrativeData" Type="CatalogService.DraftAdministrativeData" ContainsTarget="true"/>
+                <NavigationProperty Name="SiblingEntity" Type="CatalogService.Products"/>
+            </EntityType>
+            <EntityType Name="Suppliers">
+                <Key>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="identifier" Type="Edm.String"/>
+                <Property Name="name" Type="Edm.String"/>
+                <Property Name="phone" Type="Edm.String"/>
+                <Property Name="building" Type="Edm.String"/>
+                <Property Name="street" Type="Edm.String"/>
+                <Property Name="postCode" Type="Edm.String"/>
+                <Property Name="city" Type="Edm.String"/>
+                <Property Name="country" Type="Edm.String"/>
+                <NavigationProperty Name="products" Type="Collection(CatalogService.Products)" Partner="supplier">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="Currencies">
+                <Key>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+                <Property Name="symbol" Type="Edm.String" MaxLength="5"/>
+                <Property Name="minorUnit" Type="Edm.Int16"/>
+                <NavigationProperty Name="texts" Type="Collection(CatalogService.Currencies_texts)">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="localized" Type="CatalogService.Currencies_texts">
+                    <ReferentialConstraint Property="code" ReferencedProperty="code"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="DraftAdministrativeData">
+                <Key>
+                    <PropertyRef Name="DraftUUID"/>
+                </Key>
+                <Property Name="DraftUUID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="CreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="CreatedByUser" Type="Edm.String" MaxLength="256"/>
+                <Property Name="DraftIsCreatedByMe" Type="Edm.Boolean"/>
+                <Property Name="LastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="LastChangedByUser" Type="Edm.String" MaxLength="256"/>
+                <Property Name="InProcessByUser" Type="Edm.String" MaxLength="256"/>
+                <Property Name="DraftIsProcessedByMe" Type="Edm.Boolean"/>
+            </EntityType>
+            <EntityType Name="Products_texts">
+                <Key>
+                    <PropertyRef Name="locale"/>
+                    <PropertyRef Name="ID"/>
+                </Key>
+                <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+                <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="title" Type="Edm.String"/>
+                <Property Name="description" Type="Edm.String"/>
+            </EntityType>
+            <EntityType Name="Currencies_texts">
+                <Key>
+                    <PropertyRef Name="locale"/>
+                    <PropertyRef Name="code"/>
+                </Key>
+                <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+                <Property Name="name" Type="Edm.String" MaxLength="255"/>
+                <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+                <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+            </EntityType>
+            <Action Name="draftPrepare" IsBound="true" EntitySetPath="in">
+                <Parameter Name="in" Type="CatalogService.Products"/>
+                <Parameter Name="SideEffectsQualifier" Type="Edm.String"/>
+                <ReturnType Type="CatalogService.Products"/>
+            </Action>
+            <Action Name="draftActivate" IsBound="true" EntitySetPath="in">
+                <Parameter Name="in" Type="CatalogService.Products"/>
+                <ReturnType Type="CatalogService.Products"/>
+            </Action>
+            <Action Name="draftEdit" IsBound="true" EntitySetPath="in">
+                <Parameter Name="in" Type="CatalogService.Products"/>
+                <Parameter Name="PreserveChanges" Type="Edm.Boolean"/>
+                <ReturnType Type="CatalogService.Products"/>
+            </Action>
+            <Function Name="get_supplier_info" IsBound="false" IsComposable="false">
+                <ReturnType Type="Collection(CatalogService.Suppliers)" Nullable="false"/>
+            </Function>
+            <Annotations Target="CatalogService.Products">
+                <Annotation Term="UI.HeaderInfo">
+                    <Record Type="UI.HeaderInfoType">
+                        <PropertyValue Property="TypeName" String="{i18n>Cat.TypeName}"/>
+                            <PropertyValue Property="TypeNamePlural" String="{i18n>Cat.TypeNamePlural}"/>
+                                <PropertyValue Property="Title">
+                                    <Record Type="UI.DataField">
+                                        <PropertyValue Property="Value" Path="title"/>
+                                    </Record>
+                                </PropertyValue>
+                            </Record>
+                        </Annotation>
+                        <Annotation Term="UI.SelectionFields">
+                            <Collection>
+                                <PropertyPath>identifier</PropertyPath>
+                                <PropertyPath>title</PropertyPath>
+                                <PropertyPath>availability</PropertyPath>
+                                <PropertyPath>price</PropertyPath>
+                            </Collection>
+                        </Annotation>
+                        <Annotation Term="UI.LineItem">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="identifier"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="title"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="availability"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="price"/>
+                                </Record>
+                            </Collection>
+                        </Annotation>
+                        <Annotation Term="UI.HeaderFacets">
+                            <Collection>
+                                <Record Type="UI.ReferenceFacet">
+                                    <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#ProductDetail"/>
+                                    <PropertyValue Property="Label" String="{i18n>Cat.HeaderFacetDetails}"/>
+                                    </Record>
+                                    <Record Type="UI.ReferenceFacet">
+                                        <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#SupplierDetail"/>
+                                        <PropertyValue Property="Label" String="{i18n>Cat.HeaderFacetSupplier}"/>
+                                        </Record>
+                                        <Record Type="UI.ReferenceFacet">
+                                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#Price"/>
+                                        </Record>
+                                    </Collection>
+                                </Annotation>
+                                <Annotation Term="UI.Facets">
+                                    <Collection>
+                                        <Record Type="UI.CollectionFacet">
+                                            <PropertyValue Property="Label" String="{i18n>Cat.FacetProductInformation}"/>
+                                                <PropertyValue Property="Facets">
+                                                    <Collection>
+                                                        <Record Type="UI.ReferenceFacet">
+                                                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#Description"/>
+                                                            <PropertyValue Property="Label" String="{i18n>Cat.FacetSectionDescription}"/>
+                                                            </Record>
+                                                        </Collection>
+                                                    </PropertyValue>
+                                                </Record>
+                                            </Collection>
+                                        </Annotation>
+                                        <Annotation Term="UI.DataPoint" Qualifier="Price">
+                                            <Record Type="UI.DataPointType">
+                                                <PropertyValue Property="Value" Path="price"/>
+                                                <PropertyValue Property="Title" String="{i18n>Cat.HeaderPrice}"/>
+                                                </Record>
+                                            </Annotation>
+                                            <Annotation Term="UI.FieldGroup" Qualifier="Description">
+                                                <Record Type="UI.FieldGroupType">
+                                                    <PropertyValue Property="Data">
+                                                        <Collection>
+                                                            <Record Type="UI.DataField">
+                                                                <PropertyValue Property="Value" Path="description"/>
+                                                            </Record>
+                                                        </Collection>
+                                                    </PropertyValue>
+                                                </Record>
+                                            </Annotation>
+                                            <Annotation Term="UI.FieldGroup" Qualifier="ProductDetail">
+                                                <Record Type="UI.FieldGroupType">
+                                                    <PropertyValue Property="Data">
+                                                        <Collection>
+                                                            <Record Type="UI.DataField">
+                                                                <PropertyValue Property="Value" Path="identifier"/>
+                                                            </Record>
+                                                            <Record Type="UI.DataField">
+                                                                <PropertyValue Property="Value" Path="availability"/>
+                                                            </Record>
+                                                        </Collection>
+                                                    </PropertyValue>
+                                                </Record>
+                                            </Annotation>
+                                            <Annotation Term="UI.FieldGroup" Qualifier="SupplierDetail">
+                                                <Record Type="UI.FieldGroupType">
+                                                    <PropertyValue Property="Data">
+                                                        <Collection>
+                                                            <Record Type="UI.DataField">
+                                                                <PropertyValue Property="Value" Path="supplier/identifier"/>
+                                                            </Record>
+                                                            <Record Type="UI.DataField">
+                                                                <PropertyValue Property="Value" Path="supplier/postCode"/>
+                                                            </Record>
+                                                            <Record Type="UI.DataField">
+                                                                <PropertyValue Property="Value" Path="supplier/phone"/>
+                                                            </Record>
+                                                        </Collection>
+                                                    </PropertyValue>
+                                                </Record>
+                                            </Annotation>
+                                        </Annotations>
+                                        <Annotations Target="CatalogService.EntityContainer/Products">
+                                            <Annotation Term="Common.DraftRoot">
+                                                <Record Type="Common.DraftRootType">
+                                                    <PropertyValue Property="ActivationAction" String="CatalogService.draftActivate"/>
+                                                    <PropertyValue Property="EditAction" String="CatalogService.draftEdit"/>
+                                                    <PropertyValue Property="PreparationAction" String="CatalogService.draftPrepare"/>
+                                                </Record>
+                                            </Annotation>
+                                        </Annotations>
+                                        <Annotations Target="CatalogService.Products/ID">
+                                            <Annotation Term="Common.Label" String="{i18n>Cat.ProductID}"/>
+                                            </Annotations>
+                                            <Annotations Target="CatalogService.Products/identifier">
+                                                <Annotation Term="Common.Label" String="ProductID"/>
+                                            </Annotations>
+                                            <Annotations Target="CatalogService.Products/title">
+                                                <Annotation Term="Common.Label" String="Name"/>
+                                            </Annotations>
+                                            <Annotations Target="CatalogService.Products/description">
+                                                <Annotation Term="Common.Label" String="{i18n>Cat.ProductDescr}"/>
+                                                </Annotations>
+                                                <Annotations Target="CatalogService.Products/availability">
+                                                    <Annotation Term="Common.Label" String="{i18n>Cat.ProductStock}"/>
+                                                    </Annotations>
+                                                    <Annotations Target="CatalogService.Products/price">
+                                                        <Annotation Term="Common.Label" String="{i18n>Cat.ProductPrice}"/>
+                                                            <Annotation Term="Measures.ISOCurrency" Path="currency_code"/>
+                                                        </Annotations>
+                                                        <Annotations Target="CatalogService.Products/currency">
+                                                            <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+                                                                <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
+                                                                </Annotations>
+                                                                <Annotations Target="CatalogService.Products/currency_code">
+                                                                    <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+                                                                        <Annotation Term="Common.ValueList">
+                                                                            <Record Type="Common.ValueListType">
+                                                                                <PropertyValue Property="Label" String="{i18n>Currency}"/>
+                                                                                    <PropertyValue Property="CollectionPath" String="Currencies"/>
+                                                                                    <PropertyValue Property="Parameters">
+                                                                                        <Collection>
+                                                                                            <Record Type="Common.ValueListParameterInOut">
+                                                                                                <PropertyValue Property="LocalDataProperty" PropertyPath="currency_code"/>
+                                                                                                <PropertyValue Property="ValueListProperty" String="code"/>
+                                                                                            </Record>
+                                                                                            <Record Type="Common.ValueListParameterDisplayOnly">
+                                                                                                <PropertyValue Property="ValueListProperty" String="name"/>
+                                                                                            </Record>
+                                                                                        </Collection>
+                                                                                    </PropertyValue>
+                                                                                </Record>
+                                                                            </Annotation>
+                                                                            <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
+                                                                            </Annotations>
+                                                                            <Annotations Target="CatalogService.Products/image_url">
+                                                                                <Annotation Term="Common.Label" String="{i18n>Cat.ProductImage}"/>
+                                                                                    <Annotation Term="UI.IsImageURL" Bool="true"/>
+                                                                                </Annotations>
+                                                                                <Annotations Target="CatalogService.Products/IsActiveEntity">
+                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                </Annotations>
+                                                                                <Annotations Target="CatalogService.Products/HasActiveEntity">
+                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                </Annotations>
+                                                                                <Annotations Target="CatalogService.Products/HasDraftEntity">
+                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                </Annotations>
+                                                                                <Annotations Target="CatalogService.Products/DraftAdministrativeData">
+                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                </Annotations>
+                                                                                <Annotations Target="CatalogService.Suppliers/identifier">
+                                                                                    <Annotation Term="Common.Label" String="{i18n>Cat.SuppliersIdentifier}"/>
+                                                                                        <Annotation Term="Common.Text" Path="name">
+                                                                                            <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextFirst"/>
+                                                                                        </Annotation>
+                                                                                    </Annotations>
+                                                                                    <Annotations Target="CatalogService.Suppliers/phone">
+                                                                                        <Annotation Term="Common.Label" String="{i18n>Cat.SuppliersPhone}"/>
+                                                                                        </Annotations>
+                                                                                        <Annotations Target="CatalogService.Suppliers/postCode">
+                                                                                            <Annotation Term="Common.Label" String="{i18n>Cat.SuppliersPostCode}"/>
+                                                                                                <Annotation Term="Common.Text" Path="city">
+                                                                                                    <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextFirst"/>
+                                                                                                </Annotation>
+                                                                                            </Annotations>
+                                                                                            <Annotations Target="CatalogService.Currencies">
+                                                                                                <Annotation Term="UI.Identification">
+                                                                                                    <Collection>
+                                                                                                        <Record Type="UI.DataField">
+                                                                                                            <PropertyValue Property="Value" Path="name"/>
+                                                                                                        </Record>
+                                                                                                    </Collection>
+                                                                                                </Annotation>
+                                                                                            </Annotations>
+                                                                                            <Annotations Target="CatalogService.Currencies/name">
+                                                                                                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+                                                                                                </Annotations>
+                                                                                                <Annotations Target="CatalogService.Currencies/descr">
+                                                                                                    <Annotation Term="Common.Label" String="{i18n>Description}"/>
+                                                                                                    </Annotations>
+                                                                                                    <Annotations Target="CatalogService.Currencies/code">
+                                                                                                        <Annotation Term="Common.Text" Path="name"/>
+                                                                                                        <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
+                                                                                                        </Annotations>
+                                                                                                        <Annotations Target="CatalogService.Currencies/symbol">
+                                                                                                            <Annotation Term="Common.Label" String="{i18n>CurrencySymbol}"/>
+                                                                                                            </Annotations>
+                                                                                                            <Annotations Target="CatalogService.Currencies/minorUnit">
+                                                                                                                <Annotation Term="Common.Label" String="{i18n>CurrencyMinorUnit}"/>
+                                                                                                                </Annotations>
+                                                                                                                <Annotations Target="CatalogService.DraftAdministrativeData">
+                                                                                                                    <Annotation Term="Common.Label" String="{i18n>Draft_DraftAdministrativeData}"/>
+                                                                                                                    </Annotations>
+                                                                                                                    <Annotations Target="CatalogService.DraftAdministrativeData/DraftUUID">
+                                                                                                                        <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                        <Annotation Term="Common.Label" String="{i18n>Draft_DraftUUID}"/>
+                                                                                                                        </Annotations>
+                                                                                                                        <Annotations Target="CatalogService.DraftAdministrativeData/CreationDateTime">
+                                                                                                                            <Annotation Term="Common.Label" String="{i18n>Draft_CreationDateTime}"/>
+                                                                                                                            </Annotations>
+                                                                                                                            <Annotations Target="CatalogService.DraftAdministrativeData/CreatedByUser">
+                                                                                                                                <Annotation Term="Common.Label" String="{i18n>Draft_CreatedByUser}"/>
+                                                                                                                                </Annotations>
+                                                                                                                                <Annotations Target="CatalogService.DraftAdministrativeData/DraftIsCreatedByMe">
+                                                                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                                    <Annotation Term="Common.Label" String="{i18n>Draft_DraftIsCreatedByMe}"/>
+                                                                                                                                    </Annotations>
+                                                                                                                                    <Annotations Target="CatalogService.DraftAdministrativeData/LastChangeDateTime">
+                                                                                                                                        <Annotation Term="Common.Label" String="{i18n>Draft_LastChangeDateTime}"/>
+                                                                                                                                        </Annotations>
+                                                                                                                                        <Annotations Target="CatalogService.DraftAdministrativeData/LastChangedByUser">
+                                                                                                                                            <Annotation Term="Common.Label" String="{i18n>Draft_LastChangedByUser}"/>
+                                                                                                                                            </Annotations>
+                                                                                                                                            <Annotations Target="CatalogService.DraftAdministrativeData/InProcessByUser">
+                                                                                                                                                <Annotation Term="Common.Label" String="{i18n>Draft_InProcessByUser}"/>
+                                                                                                                                                </Annotations>
+                                                                                                                                                <Annotations Target="CatalogService.DraftAdministrativeData/DraftIsProcessedByMe">
+                                                                                                                                                    <Annotation Term="UI.Hidden" Bool="true"/>
+                                                                                                                                                    <Annotation Term="Common.Label" String="{i18n>Draft_DraftIsProcessedByMe}"/>
+                                                                                                                                                    </Annotations>
+                                                                                                                                                    <Annotations Target="CatalogService.Products_texts/locale">
+                                                                                                                                                        <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
+                                                                                                                                                        </Annotations>
+                                                                                                                                                        <Annotations Target="CatalogService.Products_texts/ID">
+                                                                                                                                                            <Annotation Term="Common.Label" String="UUID"/>
+                                                                                                                                                        </Annotations>
+                                                                                                                                                        <Annotations Target="CatalogService.Products_texts/title">
+                                                                                                                                                            <Annotation Term="Common.Label" String="Name"/>
+                                                                                                                                                        </Annotations>
+                                                                                                                                                        <Annotations Target="CatalogService.Currencies_texts/locale">
+                                                                                                                                                            <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
+                                                                                                                                                            </Annotations>
+                                                                                                                                                            <Annotations Target="CatalogService.Currencies_texts/name">
+                                                                                                                                                                <Annotation Term="Common.Label" String="{i18n>Name}"/>
+                                                                                                                                                                </Annotations>
+                                                                                                                                                                <Annotations Target="CatalogService.Currencies_texts/descr">
+                                                                                                                                                                    <Annotation Term="Common.Label" String="{i18n>Description}"/>
+                                                                                                                                                                    </Annotations>
+                                                                                                                                                                    <Annotations Target="CatalogService.Currencies_texts/code">
+                                                                                                                                                                        <Annotation Term="Common.Text" Path="name"/>
+                                                                                                                                                                        <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
+                                                                                                                                                                        </Annotations>
+                                                                                                                                                                    </Schema>
+                                                                                                                                                                </edmx:DataServices>
+                                                                                                                                                            </edmx:Edmx>

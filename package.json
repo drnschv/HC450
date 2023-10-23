@@ -9,7 +9,10 @@
     "@sap/cds": "^7",
     "@sap/cds-hana": "^2",
     "@sap/hdbext": "^7.3.1",
+    "@sap/xsenv": "^4.0.0",
+    "@sap/xssec": "^3.3.5",
     "express": "^4",
+    "passport": "^0.6.0",
     "sap-hdbext-promisfied": "2.202108.1"
   },
   "devDependencies": {
