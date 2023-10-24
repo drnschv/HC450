@@ -1,6 +1,14 @@
 {
-  "xsappname":"HC_OFF_SUPPLIES",
+  "xsappname":"hc_off_supplies",
   "tenant-mode":"dedicated",
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://*.us10-001.hana.ondemand.com/**",
+      "http://*.localhost:4004/**",
+      "https://*.hana.ondemand.com/**",
+      "https://*.applicationstudio.cloud.sap/**"
+    ]
+  },
   "scopes": [
     {
       "name": "$XSAPPNAME.Vendor",

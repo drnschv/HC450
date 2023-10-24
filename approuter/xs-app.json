@@ -1,5 +1,5 @@
 {	
-	"welcomeFile": "/app/osfiori/webapp/index.html",
+	"welcomeFile": "/app/officesuppliesui/webapp/index.html",
 	"authenticationMethod": "route",
 	"sessionTimeout": 30,
 	"logout": {
@@ -14,7 +14,7 @@
 	"authenticationType": "xsuaa"
 	}, 
 	{
-	"source": "/catalog/(.*)",
+	"source": "/odata/v4/catalog/(.*)",
 	"destination": "srv-binding",
 	"authenticationType": "xsuaa"
 	}

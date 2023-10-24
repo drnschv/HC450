@@ -1,8 +1,0 @@
-Downloading logs of multi-target app operation with ID 57377989-71b0-11ee-a696-eeee0a9749ac in org 3098f769trial / space dev as adrian.schivo@softtek.com...
-OK
-Saving logs to /home/user/projects/hc_off_supplies/mta-op-57377989-71b0-11ee-a696-eeee0a9749ac...
-  hc_off_supplies-approuter.log
-  OPERATION.log
-  hc_off_supplies-db-deployer.log
-  hc_off_supplies-srv.log
-OK
